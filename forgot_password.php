@@ -67,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </form>
 
 <p class="mt-3 text-center">
-<a href="login.php">Voltar ao login</a>
+<a href="index.html">Voltar ao login</a>
 </p>
 </div>
 </div>

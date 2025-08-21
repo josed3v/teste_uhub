@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([":token" => $token]);
 
-    echo "<div class='alert alert-success'>Senha redefinida com sucesso! <a href='login.php'>Login</a></div>";
+    echo "<div class='alert alert-success'>Senha redefinida com sucesso! <a href='index.html'>Login</a></div>";
 }
 ?>
 
