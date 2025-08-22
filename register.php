@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </form>
 
 <p class="mt-3 text-center">
-Já tem conta? <a href="index.html">Entrar</a>
+Já tem conta? <a href="login.php">Entrar</a>
 </p>
 </div>
 </div>

@@ -1,0 +1,63 @@
+/* Cards de projetos */
+.project-card { 
+    height: 300px; 
+    cursor:pointer; 
+    overflow:hidden; 
+    transition: transform 0.2s; 
+}
+
+.project-card img { 
+    height: 150px; 
+    object-fit: cover; 
+    width: 100%; 
+}
+
+.project-card:hover { 
+    transform: scale(1.02); 
+}
+
+/* Fotos dentro dos projetos */
+.project-photo {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.project-photo[data-posicao="center"] { object-position: center; }
+.project-photo[data-posicao="top"] { object-position: top; }
+.project-photo[data-posicao="bottom"] { object-position: bottom; }
+.project-photo[data-posicao="left"] { object-position: left; }
+.project-photo[data-posicao="right"] { object-position: right; }
+
+/* Botão do menu */
+.menu-btn { 
+    background: none; 
+    border: none; 
+    font-size: 1.5rem; 
+    cursor: pointer; 
+}
+
+/* Cropper para postagem */
+.image-cropper {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ccc;
+}
+.image-cropper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.2s;
+}
+.zoom-controls {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}

@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION["curso"] = $user["curso"];
         $_SESSION["semestre"] = $user["semestre"];
 
-        header("Location: dashboard.php");
+        header("Location: profile.php");
         exit;
     } else {
         $error = "Email ou senha inválidos!";
