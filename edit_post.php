@@ -29,14 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmtUpd = $pdo->prepare("UPDATE projetos SET titulo = ?, descricao = ? WHERE id = ?");
     $stmtUpd->execute([$titulo, $descricao, $projeto_id]);
 
-    // Atualizar posição das imagens
-    if(isset($_POST['focus'])){
-        foreach($_POST['focus'] as $img_id => $pos){
-            $stmtPos = $pdo->prepare("UPDATE projeto_imagens SET focus = ? WHERE id = ?");
-            $stmtPos->execute([$pos, $img_id]);
-        }
-    }
-
     // Upload novas imagens
     if(isset($_FILES['imagens'])){
         $uploads_dir = 'uploads/';
@@ -80,6 +72,7 @@ if(isset($_GET['delete_img'])){
 <link href="styles.css" rel="stylesheet">
 </head>
 <body class="bg-light">
+    <?php include "header.php"; ?>
 <div class="container mt-5">
 <h2>Editar Projeto</h2>
 <form method="post" enctype="multipart/form-data">
@@ -96,17 +89,8 @@ if(isset($_GET['delete_img'])){
         <div class="d-flex flex-wrap gap-2">
         <?php foreach($imagens as $img): ?>
             <div class="text-center">
-                <img src="<?= $img['imagem'] ?>" class="project-photo mb-1">
-                <select name="focus[<?= $img['id'] ?>]" class="form-select mb-1">
-                    <?php
-                    $posicoes = ['center','top','bottom','left','right'];
-                    foreach($posicoes as $p){
-                        $sel = $img['focus'] == $p ? 'selected' : '';
-                        echo "<option value='$p' $sel>$p</option>";
-                    }
-                    ?>
-                </select>
-                <a href="?id=<?= $projeto_id ?>&delete_img=<?= $img['id'] ?>" class="btn btn-sm btn-danger">Excluir</a>
+                <img src="<?= $img['imagem'] ?>" class="project-photo mb-1" style="max-height:150px; border-radius:5px;">
+                <a href="?id=<?= $projeto_id ?>&delete_img=<?= $img['id'] ?>" class="btn btn-sm btn-danger d-block">Excluir</a>
             </div>
         <?php endforeach; ?>
         </div>

@@ -10,12 +10,19 @@ imageInput.addEventListener('change', () => {
             const cropperDiv = document.createElement('div');
             cropperDiv.className = 'image-cropper';
 
+            // Imagem
             const img = document.createElement('img');
             img.src = e.target.result;
-            cropperDiv.appendChild(img);
+            img.className = 'draggable-img';
             img.dataset.focusX = 50;
             img.dataset.focusY = 50;
             img.dataset.scale = 1;
+            cropperDiv.appendChild(img);
+
+            // Overlay fixo
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay-frame';
+            cropperDiv.appendChild(overlay);
 
             previewContainer.appendChild(cropperDiv);
 
@@ -27,7 +34,10 @@ imageInput.addEventListener('change', () => {
                 startY = evt.clientY - parseFloat(img.style.top || 0);
                 img.style.cursor = 'grabbing';
             });
-            document.addEventListener('mouseup', () => { isDragging = false; img.style.cursor='grab'; });
+            document.addEventListener('mouseup', () => { 
+                isDragging = false; 
+                img.style.cursor = 'grab'; 
+            });
             document.addEventListener('mousemove', evt => {
                 if(!isDragging) return;
                 const rect = cropperDiv.getBoundingClientRect();
@@ -36,7 +46,7 @@ imageInput.addEventListener('change', () => {
                 img.style.left = left+'px';
                 img.style.top = top+'px';
 
-                // Atualiza foco
+                // Atualiza foco relativo ao overlay central
                 const focusX = ((rect.width/2 - left)/rect.width)*100;
                 const focusY = ((rect.height/2 - top)/rect.height)*100;
                 img.dataset.focusX = Math.max(0, Math.min(100, focusX));
@@ -47,8 +57,8 @@ imageInput.addEventListener('change', () => {
             cropperDiv.addEventListener('wheel', evt => {
                 evt.preventDefault();
                 let scale = parseFloat(img.dataset.scale);
-                if(evt.deltaY < 0) scale += 0.05; // scroll up = zoom in
-                else scale = Math.max(1, scale - 0.05); // scroll down = zoom out
+                if(evt.deltaY < 0) scale += 0.05; 
+                else scale = Math.max(1, scale - 0.05); 
                 img.dataset.scale = scale;
                 img.style.transform = `scale(${scale})`;
             });
@@ -59,14 +69,12 @@ imageInput.addEventListener('change', () => {
 
 form.addEventListener('submit', e => {
     // Limpar inputs antigos
-    const oldFiles = form.querySelectorAll('input[name="imagens[]"]');
-    oldFiles.forEach(f => f.remove());
-    const oldFx = form.querySelectorAll('input[name="focusX[]"]');
-    oldFx.forEach(f => f.remove());
-    const oldFy = form.querySelectorAll('input[name="focusY[]"]');
-    oldFy.forEach(f => f.remove());
+    ['imagens[]','focusX[]','focusY[]','scale[]'].forEach(name => {
+        const old = form.querySelectorAll(`input[name="${name}"]`);
+        old.forEach(f => f.remove());
+    });
 
-    // Criar inputs hidden com arquivos originais e foco
+    // Criar inputs hidden com dados
     Array.from(previewContainer.children).forEach((cropperDiv, index) => {
         const img = cropperDiv.querySelector('img');
         const file = imageInput.files[index];
@@ -88,5 +96,11 @@ form.addEventListener('submit', e => {
         fy.name = 'focusY[]';
         fy.value = img.dataset.focusY;
         form.appendChild(fy);
+
+        const sc = document.createElement('input');
+        sc.type = 'hidden';
+        sc.name = 'scale[]';
+        sc.value = img.dataset.scale;
+        form.appendChild(sc);
     });
 });

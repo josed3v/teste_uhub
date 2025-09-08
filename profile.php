@@ -62,14 +62,17 @@ $projetos = $stmtProj->fetchAll();
 </head>
 <body class="bg-light">
 
+<!-- Header compartilhado (já inclui o JS do Bootstrap Bundle) -->
+<?php include "header.php"; ?>
+
 <div class="container mt-5">
     <div class="card shadow-sm">
         <div class="card-body text-center">
             <?php if(!empty($_SESSION["foto"])): ?>
                 <img src="<?= $_SESSION["foto"] ?>" alt="Foto" class="rounded-circle mb-3" width="120" height="120" style="object-fit:cover;">
             <?php endif; ?>
-            <h2>Bem-vindo, <?= $_SESSION["nome"] ?>!</h2>
-            <p><strong>Curso:</strong> <?= $_SESSION["curso"] ?></p>
+            <h2>Bem-vindo, <?= htmlspecialchars($_SESSION["nome"]) ?>!</h2>
+            <p><strong>Curso:</strong> <?= htmlspecialchars($_SESSION["curso"]) ?></p>
             <p><strong>Semestre:</strong> <?= (int)$_SESSION["semestre"] ?></p>
             <div class="mt-3">
                 <a href="edit_profile.php" class="btn btn-primary me-2">Editar Perfil</a>
@@ -95,7 +98,7 @@ $projetos = $stmtProj->fetchAll();
         <?php if($imagens): 
             list($imgSrc, $imgFocus) = explode('::', $imagens[0]);
         ?>
-            <img src="<?= $imgSrc ?>" alt="Imagem do projeto" style="object-fit:cover; object-position:<?= $imgFocus ?>;">
+            <img src="<?= $imgSrc ?>" alt="Imagem do projeto" style="object-fit:cover; object-position:<?= htmlspecialchars($imgFocus) ?>;">
         <?php endif; ?>
         <div class="card-body">
             <h5 class="card-title"><?= htmlspecialchars($proj['titulo']) ?></h5>
@@ -129,11 +132,13 @@ $projetos = $stmtProj->fetchAll();
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- NÃO carregar bootstrap.bundle aqui (o header.php já carrega). 
+     Apenas o seu JS específico da página: -->
 <script>
 const projectModal = document.getElementById('projectModal');
 let currentProjectId = null;
 
+// Abre o modal e monta o conteúdo
 projectModal.addEventListener('show.bs.modal', event => {
     const card = event.relatedTarget;
     currentProjectId = card.getAttribute('data-id');
@@ -145,12 +150,13 @@ projectModal.addEventListener('show.bs.modal', event => {
     document.getElementById('modalTitle').textContent = titulo;
 
     let html = '';
-    if(imagens.length > 0){
+    if (imagens.length > 0) {
         html += `<div id="carouselProject" class="carousel slide mb-3" data-bs-ride="carousel">
                     <div class="carousel-inner">`;
-        imagens.forEach(([src, focus], index)=>{
+        imagens.forEach(([src, focus], index) => {
+            const safeFocus = focus ? focus : 'center';
             html += `<div class="carousel-item ${index===0?'active':''}">
-                        <img src="${src}" class="d-block w-100" style="max-height:500px; object-fit:cover; object-position:${focus};">
+                        <img src="${src}" class="d-block w-100 modal-image" style="max-height:500px; object-fit:cover; object-position:${safeFocus};" alt="Imagem do projeto">
                      </div>`;
         });
         html += `</div>
@@ -165,9 +171,16 @@ projectModal.addEventListener('show.bs.modal', event => {
     html += `<p>${descricao.replace(/\n/g,"<br>")}</p>`;
     document.getElementById('modalBody').innerHTML = html;
 
+    // Expansão das imagens dentro do modal
+    document.querySelectorAll('#modalBody img.modal-image').forEach(img => {
+        img.addEventListener('click', () => openImageOverlay(img.src));
+        img.style.cursor = 'zoom-in';
+    });
+
+    // Ações do menu
     document.getElementById('editProject').href = 'edit_post.php?id=' + currentProjectId;
     document.getElementById('deleteProject').onclick = () => {
-        if(confirm('Deseja realmente excluir este projeto?')){
+        if (confirm('Deseja realmente excluir este projeto?')) {
             window.location.href = 'profile.php?delete=' + currentProjectId;
         }
     };
@@ -176,6 +189,36 @@ projectModal.addEventListener('show.bs.modal', event => {
         alert('Link copiado para a área de transferência!');
     };
 });
+
+// Overlay simples para ampliar imagem
+function openImageOverlay(src){
+    const existing = document.querySelector('.img-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'img-overlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Imagem ampliada';
+    img.className = 'img-overlay-img';
+    img.title = 'Clique para fechar';
+
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', () => overlay.remove());
+
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            overlay.remove();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
+}
 </script>
 
 </body>

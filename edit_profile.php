@@ -55,7 +55,9 @@ $user = $stmt->fetch();
     <title>Editar Perfil</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="container py-5">
+<body>
+    <?php include "header.php"; ?>
+    <div class="container py-5">
 
     <h2>Perfil de <?php echo htmlspecialchars($user["nome"]); ?></h2>
 
@@ -86,6 +88,6 @@ $user = $stmt->fetch();
     </form>
 
     <a href="profile.php" class="btn btn-danger mt-3">Voltar</a>
-
+</div>
 </body>
 </html>

@@ -21,6 +21,8 @@
     width: 200px;
     height: 200px;
     object-fit: cover;
+    cursor: pointer; /* para mostrar que dá pra clicar */
+    transition: transform 0.2s ease-in-out;
 }
 
 .project-photo[data-posicao="center"] { object-position: center; }
@@ -35,4 +37,70 @@
     border: none; 
     font-size: 1.5rem; 
     cursor: pointer; 
+}
+
+/* Overlay fullscreen para expandir imagem */
+.image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.image-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.image-overlay img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Efeito de zoom ao passar o mouse */
+.image-overlay img:hover {
+    transform: scale(1.05);
+}
+
+/* Botão de fechar */
+.image-overlay .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+/* Overlay para imagem expandida dentro do modal */
+.img-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* acima do modal Bootstrap */
+}
+
+.img-overlay-img{
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    cursor: zoom-out;
 }
