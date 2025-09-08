@@ -42,7 +42,9 @@ $_SESSION["foto"] = $user["foto_perfil"];
 
 // Projetos e imagens
 $stmtProj = $pdo->prepare("
-    SELECT p.*, GROUP_CONCAT(CONCAT(pi.imagem, '::', pi.focus) SEPARATOR '|') AS imagens
+    SELECT p.*, GROUP_CONCAT(CONCAT(pi.imagem, '::', pi.focus) SEPARATOR '|') AS imagens,
+    (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id = p.id) AS total_curtidas,
+    (SELECT COUNT(*) FROM colaboracoes col WHERE col.projeto_id = p.id AND col.status = 'pendente') AS total_pedidos
     FROM projetos p
     LEFT JOIN projeto_imagens pi ON p.id = pi.projeto_id
     WHERE p.usuario_id = ?
@@ -59,10 +61,15 @@ $projetos = $stmtProj->fetchAll();
 <title>Seu Perfil</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
+<style>
+.card.project-card { cursor: pointer; }
+.btn-like.active { color: red; }
+.img-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:1055; }
+.img-overlay-img { max-width:90%; max-height:90%; cursor:pointer; }
+</style>
 </head>
 <body class="bg-light">
 
-<!-- Header compartilhado -->
 <?php include "header.php"; ?>
 
 <div class="container mt-5">
@@ -88,13 +95,6 @@ $projetos = $stmtProj->fetchAll();
 <div class="row">
 <?php foreach($projetos as $proj): 
     $imagens = $proj['imagens'] ? explode('|', $proj['imagens']) : [];
-
-    // Curtidas
-    $stmtCurtidas = $pdo->prepare("SELECT COUNT(*) as total, SUM(CASE WHEN usuario_id = ? THEN 1 ELSE 0 END) as curtiu FROM curtidas WHERE projeto_id = ?");
-    $stmtCurtidas->execute([$_SESSION["user_id"], $proj['id']]);
-    $curtidaInfo = $stmtCurtidas->fetch();
-    $curtiu = $curtidaInfo['curtiu'] > 0;
-    $totalCurtidas = $curtidaInfo['total'];
 ?>
 <div class="col-md-4 mb-3">
     <div class="card project-card" data-bs-toggle="modal" data-bs-target="#projectModal" 
@@ -102,8 +102,8 @@ $projetos = $stmtProj->fetchAll();
          data-titulo="<?= htmlspecialchars($proj['titulo'],ENT_QUOTES) ?>"
          data-descricao="<?= htmlspecialchars($proj['descricao'],ENT_QUOTES) ?>"
          data-imagens="<?= htmlspecialchars($proj['imagens'],ENT_QUOTES) ?>"
-         data-curtido="<?= $curtiu ?>"
-         data-total="<?= $totalCurtidas ?>">
+         data-total="<?= $proj['total_curtidas'] ?>"
+         data-pedidos="<?= $proj['total_pedidos'] ?>">
         <?php if($imagens): 
             list($imgSrc, $imgFocus) = explode('::', $imagens[0]);
         ?>
@@ -111,13 +111,8 @@ $projetos = $stmtProj->fetchAll();
         <?php endif; ?>
         <div class="card-body">
             <h5 class="card-title"><?= htmlspecialchars($proj['titulo']) ?></h5>
-            <p class="text-muted mb-1">
-                <span class="like-count"><?= $totalCurtidas ?></span> curtida(s)
-            </p>
+            <p class="mb-1"><span class="text-muted" id="like-count-<?= $proj['id'] ?>"><?= $proj['total_curtidas'] ?> curtidas</span> | <?= $proj['total_pedidos'] ?> pedidos de colaboração</p>
             <p class="card-text"><?= nl2br(htmlspecialchars(substr($proj['descricao'],0,100))) ?>...</p>
-            <button class="btn btn-sm <?= $curtiu ? 'btn-primary' : 'btn-outline-primary' ?>" onclick="toggleLike(<?= $proj['id'] ?>, this)">
-                <?= $curtiu ? 'Curtido' : 'Curtir' ?>
-            </button>
         </div>
     </div>
 </div>
@@ -142,55 +137,39 @@ $projetos = $stmtProj->fetchAll();
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-primary" id="btnLike">Curtir</button>
+        <button class="btn btn-outline-success" id="btnColab">Pedir colaboração</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function toggleLike(projetoId, btn) {
-    fetch('toggle_like.php', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ projeto_id: projetoId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success){
-            const card = btn.closest('.card');
-            card.querySelector('.like-count').textContent = data.total;
-            if(data.curtiu){
-                btn.classList.remove('btn-outline-primary');
-                btn.classList.add('btn-primary');
-                btn.textContent = 'Curtido';
-            } else {
-                btn.classList.remove('btn-primary');
-                btn.classList.add('btn-outline-primary');
-                btn.textContent = 'Curtir';
-            }
-        }
-    });
-}
-
-// Modal de projeto (imagem e menu) - mantido do original
+// Modal de projetos
 const projectModal = document.getElementById('projectModal');
 let currentProjectId = null;
+let likeActive = false;
+
 projectModal.addEventListener('show.bs.modal', event => {
     const card = event.relatedTarget;
     currentProjectId = card.getAttribute('data-id');
     const titulo = card.getAttribute('data-titulo');
     const descricao = card.getAttribute('data-descricao');
     const imagensStr = card.getAttribute('data-imagens');
-    const imagens = imagensStr ? imagensStr.split('|').map(i=>i.split('::')) : [];
+    const totalCurtidas = parseInt(card.getAttribute('data-total')) || 0;
 
+    const imagens = imagensStr ? imagensStr.split('|').map(i=>i.split('::')) : [];
     document.getElementById('modalTitle').textContent = titulo;
+
     let html = '';
-    if(imagens.length > 0){
+    if (imagens.length > 0) {
         html += `<div id="carouselProject" class="carousel slide mb-3" data-bs-ride="carousel">
                     <div class="carousel-inner">`;
-        imagens.forEach(([src, focus], index)=>{
+        imagens.forEach(([src, focus], index) => {
             html += `<div class="carousel-item ${index===0?'active':''}">
-                        <img src="${src}" class="d-block w-100 modal-image" style="max-height:500px; object-fit:cover; object-position:${focus ? focus:'center'}">
+                        <img src="${src}" class="d-block w-100 modal-image" style="max-height:500px; object-fit:cover; object-position:${focus?focus:'center'};" alt="Imagem do projeto">
                      </div>`;
         });
         html += `</div>
@@ -205,45 +184,72 @@ projectModal.addEventListener('show.bs.modal', event => {
     html += `<p>${descricao.replace(/\n/g,"<br>")}</p>`;
     document.getElementById('modalBody').innerHTML = html;
 
-    document.querySelectorAll('#modalBody img.modal-image').forEach(img=>{
-        img.addEventListener('click', ()=>openImageOverlay(img.src));
+    document.querySelectorAll('#modalBody img.modal-image').forEach(img => {
+        img.addEventListener('click', () => openImageOverlay(img.src));
         img.style.cursor = 'zoom-in';
     });
 
-    document.getElementById('editProject').href = 'edit_post.php?id='+currentProjectId;
-    document.getElementById('deleteProject').onclick = () => {
-        if(confirm('Deseja realmente excluir este projeto?')){
-            window.location.href='profile.php?delete='+currentProjectId;
-        }
-    };
-    document.getElementById('shareProject').onclick = () => {
-        navigator.clipboard.writeText(window.location.href+'?project='+currentProjectId);
-        alert('Link copiado para a área de transferência!');
-    };
+    // Atualiza botão de curtida
+    fetch('check_like.php?projeto_id='+currentProjectId)
+        .then(res=>res.json())
+        .then(data=>{
+            likeActive = data.liked;
+            document.getElementById('btnLike').classList.toggle('active', likeActive);
+            document.getElementById('btnLike').textContent = likeActive ? 'Descurtir' : 'Curtir';
+        });
 });
 
+// Botão de curtida
+document.getElementById('btnLike').addEventListener('click', e => {
+    e.stopPropagation();
+    fetch('toggle_like.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({projeto_id: currentProjectId})
+    }).then(res=>res.json()).then(data=>{
+        likeActive = data.liked;
+        document.getElementById('btnLike').classList.toggle('active', likeActive);
+        document.getElementById('btnLike').textContent = likeActive ? 'Descurtir' : 'Curtir';
+        document.getElementById('like-count-'+currentProjectId).textContent = data.total+' curtidas';
+    });
+});
+
+// Botão de colaboração
+document.getElementById('btnColab').addEventListener('click', e => {
+    e.stopPropagation();
+    fetch('toggle_colab.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({projeto_id: currentProjectId})
+    }).then(res=>res.json()).then(data=>{
+        alert(data.message);
+    });
+});
+
+// Overlay para expandir imagem
 function openImageOverlay(src){
     const existing = document.querySelector('.img-overlay');
-    if(existing) existing.remove();
+    if (existing) existing.remove();
+
     const overlay = document.createElement('div');
-    overlay.className='img-overlay';
+    overlay.className = 'img-overlay';
     overlay.setAttribute('role','dialog');
     overlay.setAttribute('aria-modal','true');
+
     const img = document.createElement('img');
-    img.src=src;
-    img.alt='Imagem ampliada';
-    img.className='img-overlay-img';
-    img.title='Clique para fechar';
+    img.src = src;
+    img.alt = 'Imagem ampliada';
+    img.className = 'img-overlay-img';
+    img.title = 'Clique para fechar';
+
     overlay.appendChild(img);
     document.body.appendChild(overlay);
-    overlay.addEventListener('click', ()=>overlay.remove());
-    const escHandler = (e)=>{
-        if(e.key==='Escape'){
-            overlay.remove();
-            document.removeEventListener('keydown',escHandler);
-        }
-    };
-    document.addEventListener('keydown',escHandler);
+
+    overlay.addEventListener('click', () => overlay.remove());
+
+    document.addEventListener('keydown', function escHandler(e){
+        if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler);}
+    });
 }
 </script>
 
