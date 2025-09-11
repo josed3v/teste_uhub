@@ -21,7 +21,7 @@ $imagens = $projeto['imagens'] ? explode('|', $projeto['imagens']) : [];
                 <span class="like-count" id="like-count-<?= $projeto['id'] ?>"><?= $projeto['total_likes'] ?></span>
                 <button class="colab-btn btn btn-outline-success btn-sm" data-id="<?= $projeto['id'] ?>">🤝</button>
             </div>
-            <h6 class="card-subtitle text-muted mb-2">por <?= htmlspecialchars($projeto['autor']) ?> em <?= date("d/m/Y H:i", strtotime($projeto['data_publicacao'])) ?></h6>
+            <h6 class="card-subtitle text-muted mb-3 mt-1">por <?= htmlspecialchars($projeto['autor']) ?> em <?= date("d/m/Y H:i", strtotime($projeto['data_publicacao'])) ?></h6>
             <p class="card-text"><?= nl2br(htmlspecialchars(substr($projeto['descricao'],0,100))) ?>...</p>
         </div>
     </div>
