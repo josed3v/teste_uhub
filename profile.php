@@ -42,7 +42,7 @@ $_SESSION["semestre"] = $user["semestre"];
 $_SESSION["foto"] = $user["foto_perfil"];
 
 // Projetos do usuário
-$stmt = $pdo->prepare("
+$stmtProj = $pdo->prepare("
     SELECT p.*, u.nome AS autor, u.foto_perfil, 
            GROUP_CONCAT(CONCAT(pi.imagem,'::',pi.focus) SEPARATOR '|') AS imagens,
            (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id) AS total_likes,
@@ -50,12 +50,15 @@ $stmt = $pdo->prepare("
     FROM projetos p
     JOIN usuarios u ON p.usuario_id = u.id
     LEFT JOIN projeto_imagens pi ON p.id = pi.projeto_id
+    WHERE p.usuario_id = ? 
     GROUP BY p.id
     ORDER BY p.data_publicacao DESC
 ");
 
-$stmt->execute([$_SESSION['user_id']]);
-$projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmtProj->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
+$projetos = $stmtProj->fetchAll();
+
 
 ?>
 <!doctype html>
