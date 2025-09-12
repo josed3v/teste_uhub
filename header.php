@@ -26,7 +26,7 @@ $pendentesCount = $stmtPendentes->fetchColumn();
         <li class="nav-item me-3">
           <a class="nav-link" href="feed.php">Feed</a>
         </li>
-                <li class="nav-item ms-3">
+        <li class="nav-item ms-3">
           <a class="nav-link" href="profile.php"><?= htmlspecialchars($_SESSION["nome"]) ?></a>
         </li>
         <li class="nav-item dropdown">

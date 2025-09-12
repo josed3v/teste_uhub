@@ -9,7 +9,7 @@ require_once "db.php";
 
 // Buscar todos os projetos com informações do usuário, imagens e curtidas
 $stmt = $pdo->prepare("
-    SELECT p.*, u.nome AS autor, 
+    SELECT p.*, u.nome AS autor, u.foto_perfil, 
            GROUP_CONCAT(CONCAT(pi.imagem,'::',pi.focus) SEPARATOR '|') AS imagens,
            (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id) AS total_likes,
            (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like
@@ -19,6 +19,7 @@ $stmt = $pdo->prepare("
     GROUP BY p.id
     ORDER BY p.data_publicacao DESC
 ");
+
 $stmt->execute([$_SESSION['user_id']]);
 $projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>

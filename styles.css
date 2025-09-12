@@ -4,6 +4,7 @@
     cursor:pointer; 
     overflow:hidden; 
     transition: transform 0.2s; 
+    position: relative; /* necessário para posicionar a tag de perfil */
 }
 
 .project-card img { 
@@ -14,6 +15,60 @@
 
 .project-card:hover { 
     transform: scale(1.02); 
+}
+
+/* Tag de perfil no card */
+.profile-tag {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+}
+
+.profile-tag .tag-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.profile-tag .tag-avatar {
+    position: absolute;
+    top: 12.9px;   /* ajuste fino para centralizar dentro da tag */
+    left: 22.2px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 2;
+    border: 0,5px solid #fff; /* contorno para destacar */
+}
+
+
+/* --- Responsividade da tag de perfil --- */
+@media (max-width: 768px) {
+    .profile-tag {
+        width: 100px;
+        height: 100px;
+    }
+    .profile-tag .tag-avatar {
+        top: 12%;
+        left: 23%;
+        width: 55%;
+        height: 55%;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-tag {
+        width: 100px;
+        height: 100px;
+    }
+    .profile-tag .tag-avatar {
+        top: 12%;
+        left: 22%;
+        width: 55%;
+        height: 55%;
+    }
 }
 
 /* Fotos dentro dos projetos */
