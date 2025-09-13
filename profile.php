@@ -88,7 +88,6 @@ $projetos = $stmtProj->fetchAll();
                 <div class="mt-3">
                     <a href="edit_profile.php" class="btn btn-primary me-2">Editar Perfil</a>
                     <a href="post_profile.php" class="btn btn-success me-2">Postar Projeto</a>
-                    <a href="logout.php" class="btn btn-secondary">Sair</a>
                 </div>
             </div>
         </div>

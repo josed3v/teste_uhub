@@ -1,6 +1,6 @@
 /* Cards de projetos */
 .project-card { 
-    height: 300px; 
+    height: 310px; 
     cursor:pointer; 
     overflow:hidden; 
     transition: transform 0.2s; 
