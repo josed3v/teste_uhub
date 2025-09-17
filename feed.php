@@ -25,30 +25,33 @@ $projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="pt-br">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Feed</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="css/styles.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
-<?php include "header.php"; ?>
+    <?php include "header.php"; ?>
 
-<div class="container mt-4">
-    <h2 class="mb-4">Feed de Projetos</h2>
-    <div class="row">
-        <?php foreach($projetos as $projeto): ?>
-            <?php include "components/project_card.php"; ?>
-        <?php endforeach; ?>
+    <div class="container mt-4">
+        <h2 class="mb-4">Feed de Projetos</h2>
+        <div class="row">
+            <?php foreach ($projetos as $projeto): ?>
+                <?php include "components/project_card.php"; ?>
+            <?php endforeach; ?>
+        </div>
     </div>
-</div>
 
-<?php include "components/project_modal.php"; ?>
+    <?php include "components/project_modal.php"; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="js/project.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/project.js"></script>
 </body>
+
 </html>
