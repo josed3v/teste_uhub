@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["user_id"])) {
-    header("Location: index.html");
+    header("Location: login.php");
     exit;
 }
 
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="stylesheet" href="css/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
-    <?php include "header.php"; ?>
+<?php include "components/header.php"; ?>
 <div class="container mt-5">
     <h2>Postar Projeto</h2>
     <form method="post" enctype="multipart/form-data">

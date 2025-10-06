@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["user_id"])) {
-    header("Location: index.html");
+    header("Location: login.php");
     exit;
 }
 
@@ -37,7 +37,7 @@ $projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <body class="bg-light">
 
-<?php include "header.php"; ?>
+<?php include "components/header.php"; ?>
 
 <div class="container mt-4">
     <h2 class="mb-4">Feed</h2>

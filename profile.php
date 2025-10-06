@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["user_id"])) {
-    header("Location: index.html");
+    header("Location: login.php");
     exit;
 }
 
@@ -39,7 +39,7 @@ if ($isOwnProfile && isset($_GET['delete'])) {
 }
 
 // --- Dados do usuário ---
-$stmt = $pdo->prepare("SELECT id, nome, email, curso, semestre, foto_perfil FROM usuarios WHERE id = ?");
+$stmt = $pdo->prepare("SELECT id, nome, email, curso, semestre, bio, foto_perfil FROM usuarios WHERE id = ?");
 $stmt->execute([$profileId]);
 $user = $stmt->fetch();
 if (!$user) exit("Usuário não encontrado.");
@@ -49,7 +49,8 @@ if ($isOwnProfile) {
     $_SESSION["nome"] = $user["nome"];
     $_SESSION["email"] = $user["email"];
     $_SESSION["curso"] = $user["curso"];
-    $_SESSION["semestre"] = $user["semestre"];
+    $_SESSION["semestre"] = $user["semestre"];    
+    $_SESSION["bio"] = $user["bio"];
     $_SESSION["foto"] = $user["foto_perfil"];
 }
 
@@ -100,7 +101,7 @@ $projetosColab = $stmtColab->fetchAll();
 </head>
 <body class="bg-light">
 
-<?php include "header.php"; ?>
+<?php include "components/header.php"; ?>
 
 <div class="container mt-5">
     <div class="card shadow-sm">
@@ -109,6 +110,8 @@ $projetosColab = $stmtColab->fetchAll();
             <h2><?= $isOwnProfile ? "Bem-vindo, " . htmlspecialchars($user["nome"]) : htmlspecialchars($user["nome"]) ?></h2>
             <p><strong>Curso:</strong> <?= htmlspecialchars($user["curso"]) ?></p>
             <p><strong>Semestre:</strong> <?= (int)$user["semestre"] ?></p>
+            <p><?= htmlspecialchars($user["bio"] ?? '') ?></p>
+
             <?php if ($isOwnProfile): ?>
             <div class="mt-3">
                 <a href="edit_profile.php" class="btn btn-primary me-2">Editar Perfil</a>

@@ -4,7 +4,7 @@ require_once "db.php";
 
 $user_id = $_SESSION["user_id"] ?? null;
 if (!$user_id) {
-    header("Location: index.html");
+    header("Location: feed.php");
     exit;
 }
 

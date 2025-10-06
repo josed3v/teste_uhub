@@ -11,9 +11,10 @@ $user_id = $_SESSION["user_id"];
 
 // --- Atualizar dados do perfil ---
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $nome = $_POST["nome"];
-    $curso = $_POST["curso"];
-    $semestre = $_POST["semestre"];
+    $nome = $_POST["nome"] ?? '';
+    $curso = $_POST["curso"] ?? '';
+    $semestre = $_POST["semestre"] ?? '';
+    $bio = $_POST["bio"] ?? '';
 
     // Se o usuário enviar uma nova foto
     if (!empty($_FILES["foto"]["name"])) {
@@ -26,18 +27,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (in_array($imageFileType, $allowed)) {
             if (move_uploaded_file($_FILES["foto"]["tmp_name"], $target_file)) {
-                $sql = "UPDATE usuarios SET nome=?, curso=?, semestre=?, foto_perfil=? WHERE id=?";
+                $sql = "UPDATE usuarios SET nome=?, curso=?, semestre=?, bio=?, foto_perfil=? WHERE id=?";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([$nome, $curso, $semestre, $target_file, $user_id]);
+                $stmt->execute([$nome, $curso, $semestre, $bio, $target_file, $user_id]);
             }
         } else {
             echo "Formato de imagem inválido. Use JPG, PNG ou GIF.";
         }
     } else {
         // Atualiza sem trocar a foto
-        $sql = "UPDATE usuarios SET nome=?, curso=?, semestre=? WHERE id=?";
+        $sql = "UPDATE usuarios SET nome=?, curso=?, semestre=?, bio=? WHERE id=?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$nome, $curso, $semestre, $user_id]);
+        $stmt->execute([$nome, $curso, $semestre, $bio, $user_id]);
     }
 }
 
@@ -45,7 +46,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $sql = "SELECT * FROM usuarios WHERE id = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$user_id]);
-$user = $stmt->fetch();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Evita erro de htmlspecialchars com valores nulos
+$user = array_map(fn($v) => $v ?? '', $user);
 ?>
 
 <!DOCTYPE html>
@@ -53,11 +57,11 @@ $user = $stmt->fetch();
 <head>
     <meta charset="UTF-8">
     <title>Editar Perfil</title>
-<link rel="stylesheet" href="css/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/css/bootstrap.min.css">
 </head>
 <body>
-    <?php include "header.php"; ?>
-    <div class="container py-5">
+<?php include "components/header.php"; ?>
+<div class="container py-5">
 
     <h2>Perfil de <?php echo htmlspecialchars($user["nome"]); ?></h2>
 
@@ -79,6 +83,10 @@ $user = $stmt->fetch();
         <div class="mb-3">
             <label class="form-label">Semestre</label>
             <input type="text" name="semestre" value="<?php echo htmlspecialchars($user["semestre"]); ?>" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Biografia</label>
+            <textarea name="bio" class="form-control" rows="4" placeholder="Fale um pouco sobre você..."><?php echo htmlspecialchars($user["bio"]); ?></textarea>
         </div>
         <div class="mb-3">
             <label class="form-label">Foto de Perfil</label>

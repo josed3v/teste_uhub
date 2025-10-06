@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const userLike = card.getAttribute("data-userlike") === "1";
             const userColab = card.getAttribute("data-usercolab") === "1";
             const autor = card.getAttribute("data-autor");
+            const user_id = card.getAttribute("data-user_id"); // 👈 novo atributo para o ID do autor
             const dataPub = new Date(card.getAttribute("data-data"));
             const dataFormatada = dataPub.toLocaleDateString("pt-BR") + " " + dataPub.toLocaleTimeString("pt-BR",{hour:'2-digit',minute:'2-digit'});
 
@@ -110,8 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
                          </div>`;
             }
 
-            // Autor e Data
-            html += `<h6 class="text-muted mb-2">Por <strong>${autor}</strong> em ${dataFormatada}</h6>`;
+            // Autor e Data (com link clicável)
+            html += `<h6 class="text-muted mb-2">
+                        Por <strong><a href="profile.php?id=<?= urlencode($autorId) ?>" class="text-decoration-none fw-bold">
+                    <?= htmlspecialchars($projeto['autor']) ?>
+                </a></strong>
+                        em ${dataFormatada}
+                     </h6>`;
 
             // Botões
             html += `<div class="d-flex gap-2 mb-3">

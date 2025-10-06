@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["user_id"])) {
-    header("Location: index.html");
+    header("Location: login.php");
     exit;
 }
 
@@ -74,7 +74,7 @@ if (isset($_GET['delete_img'])) {
 </head>
 
 <body class="bg-light">
-    <?php include "header.php"; ?>
+<?php include "components/header.php"; ?>
     <div class="container mt-5">
         <h2>Editar Projeto</h2>
         <form method="post" enctype="multipart/form-data">

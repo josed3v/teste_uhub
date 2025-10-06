@@ -6,6 +6,7 @@ $userColab = !empty($projeto['user_colab']);
 $imagensStr = $projeto['imagens'];
 $imagensArr = $imagensStr ? explode('|', $imagensStr) : [];
 $dataFormatada = date("d/m/Y H:i", strtotime($projeto['data_publicacao']));
+$autorId = $projeto['usuario_id']; // ID do autor
 ?>
 
 <div class="col-md-4 mb-4">
@@ -25,7 +26,7 @@ $dataFormatada = date("d/m/Y H:i", strtotime($projeto['data_publicacao']));
                 list($firstImg, $focus) = explode('::', $imagensArr[0]);
                 $focus = $focus ?: "center";
             ?>
-            <img src="<?= $firstImg ?>" class="card-img-top" style="height:200px; object-fit:cover; object-position:<?= $focus ?>;">
+            <img src="<?= htmlspecialchars($firstImg) ?>" class="card-img-top" style="height:200px; object-fit:cover; object-position:<?= htmlspecialchars($focus) ?>;">
         <?php else: ?>
             <img src="uploads/default.png" class="card-img-top" style="height:200px; object-fit:cover;">
         <?php endif; ?>
@@ -33,8 +34,14 @@ $dataFormatada = date("d/m/Y H:i", strtotime($projeto['data_publicacao']));
         <div class="card-body d-flex flex-column">
             <h5 class="card-title"><?= htmlspecialchars($projeto['titulo']) ?></h5>
             <p class="text-muted small">
-                Por <strong><?= htmlspecialchars($projeto['autor']) ?></strong> em <?= $dataFormatada ?>
+                Por 
+                <a href="profile.php?id=<?= urlencode($autorId) ?>" class="text-decoration-none fw-bold">
+                    <?= htmlspecialchars($projeto['autor']) ?>
+                </a>
+                <br>
+                <small><?= $dataFormatada ?></small>
             </p>
+
             <p class="card-text text-truncate"><?= htmlspecialchars($projeto['descricao']) ?></p>
 
             <div class="mt-auto d-flex justify-content-between align-items-center">
@@ -45,7 +52,6 @@ $dataFormatada = date("d/m/Y H:i", strtotime($projeto['data_publicacao']));
                     🤝
                 </button>
             </div>
-
         </div>
     </div>
 </div>

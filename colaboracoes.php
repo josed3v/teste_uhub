@@ -3,7 +3,7 @@ session_start();
 require_once "db.php";
 
 if(!isset($_SESSION['user_id'])){
-    header("Location: index.html");
+    header("Location: login.php");
     exit;
 }
 
@@ -30,7 +30,7 @@ $solicitacoes = $stmt->fetchAll();
 <link rel="stylesheet" href="css/css/bootstrap.min.css">
 </head>
 <body>
-<?php include "header.php"; ?>
+<?php include "components/header.php"; ?>
 
 <div class="container py-5">
     <h2>Solicitações de Colaboração</h2>
