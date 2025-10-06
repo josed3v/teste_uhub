@@ -1,53 +1,51 @@
 <?php
-// $projeto deve ser definido antes de incluir este arquivo
-$imagens = !empty($projeto['imagens']) ? explode('|', $projeto['imagens']) : [];
-$user_colab = $projeto['user_colab'] ?? false; // true se o usuário já colaborou
+$projectId = $projeto['id'];
+$totalLikes = $projeto['total_likes'];
+$userLike = !empty($projeto['user_like']);
+$userColab = !empty($projeto['user_colab']);
+$imagensStr = $projeto['imagens'];
+$imagensArr = $imagensStr ? explode('|', $imagensStr) : [];
+$dataFormatada = date("d/m/Y H:i", strtotime($projeto['data_publicacao']));
 ?>
 
-<div class="col-md-4 mb-3">
-    <div class="card project-card position-relative"
-        data-bs-toggle="modal" data-bs-target="#projectModal"
-        data-id="<?= $projeto['id'] ?>"
-        data-titulo="<?= htmlspecialchars($projeto['titulo'], ENT_QUOTES) ?>"
-        data-descricao="<?= htmlspecialchars($projeto['descricao'], ENT_QUOTES) ?>"
-        data-imagens="<?= htmlspecialchars($projeto['imagens'], ENT_QUOTES) ?>"
-        data-likes="<?= $projeto['total_likes'] ?>"
-        data-userlike="<?= $projeto['user_like'] ?>"
-        data-usercolab="<?= $user_colab ?>">
-
-        <!-- Tag de perfil -->
-        <a href="profile.php?id=<?= $projeto['usuario_id'] ?>" class="profile-tag">
-            <img src="uploads/profile_tag.png" alt="Tag" class="tag-bg">
-            <img src="<?= htmlspecialchars($projeto['foto_perfil'] ?? 'uploads/default.png') ?>"
-                alt="Foto do Autor" class="tag-avatar">
-        </a>
-
-        <!-- Primeira imagem do projeto -->
-        <?php if (!empty($imagens)):
-            list($imgSrc, $imgFocus) = explode('::', $imagens[0]);
-        ?>
-            <img src="<?= htmlspecialchars($imgSrc) ?>" 
-                 alt="Imagem do projeto"
-                 style="object-fit:cover; object-position:<?= htmlspecialchars($imgFocus) ?>; width:100%; height:200px;">
+<div class="col-md-4 mb-4">
+    <div class="card shadow-sm h-100" data-bs-toggle="modal" data-bs-target="#projectModal"
+         data-id="<?= $projectId ?>"
+         data-titulo="<?= htmlspecialchars($projeto['titulo']) ?>"
+         data-descricao="<?= htmlspecialchars($projeto['descricao']) ?>"
+         data-imagens="<?= htmlspecialchars($imagensStr) ?>"
+         data-likes="<?= $totalLikes ?>"
+         data-userlike="<?= $userLike ? 1 : 0 ?>"
+         data-usercolab="<?= $userColab ? 1 : 0 ?>"
+         data-autor="<?= htmlspecialchars($projeto['autor']) ?>"
+         data-data="<?= $projeto['data_publicacao'] ?>"
+    >
+        <?php if (!empty($imagensArr)): ?>
+            <?php
+                list($firstImg, $focus) = explode('::', $imagensArr[0]);
+                $focus = $focus ?: "center";
+            ?>
+            <img src="<?= $firstImg ?>" class="card-img-top" style="height:200px; object-fit:cover; object-position:<?= $focus ?>;">
+        <?php else: ?>
+            <img src="uploads/default.png" class="card-img-top" style="height:200px; object-fit:cover;">
         <?php endif; ?>
 
-        <div class="card-body">
+        <div class="card-body d-flex flex-column">
             <h5 class="card-title"><?= htmlspecialchars($projeto['titulo']) ?></h5>
-            <div>
-                <button class="like-btn btn <?= $projeto['user_like'] ? 'btn-primary' : 'btn-outline-primary' ?> btn-sm"
-                        data-id="<?= $projeto['id'] ?>">❤️</button>
-                <span class="like-count" id="like-count-<?= $projeto['id'] ?>"><?= $projeto['total_likes'] ?></span>
+            <p class="text-muted small">
+                Por <strong><?= htmlspecialchars($projeto['autor']) ?></strong> em <?= $dataFormatada ?>
+            </p>
+            <p class="card-text text-truncate"><?= htmlspecialchars($projeto['descricao']) ?></p>
 
-                <button class="colab-btn btn <?= $user_colab ? 'btn-success' : 'btn-outline-success' ?> btn-sm"
-                        data-id="<?= $projeto['id'] ?>">🤝</button>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+                <button class="btn <?= $userLike ? 'btn-primary' : 'btn-outline-primary' ?> like-btn" data-id="<?= $projectId ?>">
+                    ❤️ <span id="like-count-<?= $projectId ?>"><?= $totalLikes ?></span>
+                </button>
+                <button class="btn <?= $userColab ? 'btn-success' : 'btn-outline-success' ?> colab-btn" data-id="<?= $projectId ?>">
+                    🤝
+                </button>
             </div>
 
-            <h6 class="card-subtitle text-muted mb-3 mt-1">
-                por <?= htmlspecialchars($projeto['autor']) ?>
-                em <?= date("d/m/Y H:i", strtotime($projeto['data_publicacao'])) ?>
-            </h6>
-
-            <p class="card-text"><?= nl2br(htmlspecialchars(substr($projeto['descricao'], 0, 100))) ?>...</p>
         </div>
     </div>
 </div>

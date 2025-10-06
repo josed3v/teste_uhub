@@ -7,12 +7,13 @@ if (!isset($_SESSION["user_id"])) {
 
 require_once "db.php";
 
-// Buscar todos os projetos com informações do usuário, imagens e curtidas
+// Buscar todos os projetos com informações do usuário, imagens, curtidas e colaboração
 $stmt = $pdo->prepare("
     SELECT p.*, u.nome AS autor, u.foto_perfil, 
            GROUP_CONCAT(CONCAT(pi.imagem,'::',pi.focus) SEPARATOR '|') AS imagens,
            (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id) AS total_likes,
-           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like
+           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like,
+           (SELECT COUNT(*) FROM colaboracoes co WHERE co.projeto_id=p.id AND co.usuario_id=?) AS user_colab
     FROM projetos p
     JOIN usuarios u ON p.usuario_id = u.id
     LEFT JOIN projeto_imagens pi ON p.id = pi.projeto_id
@@ -20,7 +21,7 @@ $stmt = $pdo->prepare("
     ORDER BY p.data_publicacao DESC
 ");
 
-$stmt->execute([$_SESSION['user_id']]);
+$stmt->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
 $projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
@@ -30,28 +31,31 @@ $projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed</title>
-<link rel="stylesheet" href="css/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/css/bootstrap.min.css">
     <link href="css/styles.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
 
-    <?php include "header.php"; ?>
+<?php include "header.php"; ?>
 
-    <div class="container mt-4">
-        <h2 class="mb-4">Feed de Projetos</h2>
-        <div class="row">
-            <?php foreach ($projetos as $projeto): ?>
-                <?php include "components/project_card.php"; ?>
-            <?php endforeach; ?>
-        </div>
+<div class="container mt-4">
+    <h2 class="mb-4">Feed</h2>
+    <div class="row">
+        <?php foreach ($projetos as $projeto): ?>
+            <?php 
+                // Define variável para o botão de colaboração
+                $projeto['user_colab'] = !empty($projeto['user_colab']) ? 1 : 0;
+                include "components/project_card.php"; 
+            ?>
+        <?php endforeach; ?>
     </div>
+</div>
 
-    <?php include "components/project_modal.php"; ?>
+<?php include "components/project_modal.php"; ?>
 
 <script src="js/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/project.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/project.js"></script>
 </body>
-
 </html>

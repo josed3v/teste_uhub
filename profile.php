@@ -9,11 +9,9 @@ require_once "db.php";
 
 // --- Identificar se é perfil próprio ou de visita ---
 if (isset($_GET['id']) && $_GET['id'] != $_SESSION['user_id']) {
-    // Perfil de outro usuário
     $profileId = (int)$_GET['id'];
     $isOwnProfile = false;
 } else {
-    // Meu próprio perfil
     $profileId = $_SESSION['user_id'];
     $isOwnProfile = true;
 }
@@ -40,13 +38,13 @@ if ($isOwnProfile && isset($_GET['delete'])) {
     exit;
 }
 
-// --- Dados do usuário do perfil (meu ou visitado) ---
+// --- Dados do usuário ---
 $stmt = $pdo->prepare("SELECT id, nome, email, curso, semestre, foto_perfil FROM usuarios WHERE id = ?");
 $stmt->execute([$profileId]);
 $user = $stmt->fetch();
 if (!$user) exit("Usuário não encontrado.");
 
-// --- Guardar dados só se for meu perfil ---
+// --- Guardar dados se for próprio perfil ---
 if ($isOwnProfile) {
     $_SESSION["nome"] = $user["nome"];
     $_SESSION["email"] = $user["email"];
@@ -55,43 +53,44 @@ if ($isOwnProfile) {
     $_SESSION["foto"] = $user["foto_perfil"];
 }
 
-// --- Projetos do usuário visitado ---
+// --- Projetos do usuário ---
 $stmtProj = $pdo->prepare("
     SELECT p.*, u.nome AS autor, u.foto_perfil, 
            GROUP_CONCAT(CONCAT(pi.imagem,'::',pi.focus) SEPARATOR '|') AS imagens,
            (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id) AS total_likes,
-           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like
+           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like,
+           (SELECT COUNT(*) FROM colaboracoes co WHERE co.projeto_id=p.id AND co.usuario_id=?) AS user_colab
     FROM projetos p
     JOIN usuarios u ON p.usuario_id = u.id
     LEFT JOIN projeto_imagens pi ON p.id = pi.projeto_id
-    WHERE p.usuario_id = ? 
+    WHERE p.usuario_id = ?
     GROUP BY p.id
     ORDER BY p.data_publicacao DESC
 ");
-$stmtProj->execute([$_SESSION['user_id'], $profileId]);
+$stmtProj->execute([$_SESSION['user_id'], $_SESSION['user_id'], $profileId]);
 $projetos = $stmtProj->fetchAll();
 
-// --- Projetos colaborados do usuário (aceitos) ---
+// --- Projetos que o usuário colabora ---
 $stmtColab = $pdo->prepare("
     SELECT p.*, u.nome AS autor, u.foto_perfil,
            GROUP_CONCAT(CONCAT(pi.imagem,'::',pi.focus) SEPARATOR '|') AS imagens,
            (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id) AS total_likes,
-           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like
-    FROM colaboracoes c
-    JOIN projetos p ON c.projeto_id = p.id
+           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like,
+           1 AS user_colab
+    FROM projetos p
     JOIN usuarios u ON p.usuario_id = u.id
     LEFT JOIN projeto_imagens pi ON p.id = pi.projeto_id
-    WHERE c.usuario_id = ? AND c.status='aceito'
+    JOIN colaboracoes co ON co.projeto_id = p.id
+    WHERE co.usuario_id = ?
     GROUP BY p.id
     ORDER BY p.data_publicacao DESC
 ");
 $stmtColab->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
 $projetosColab = $stmtColab->fetchAll();
-
 ?>
+
 <!doctype html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -99,62 +98,53 @@ $projetosColab = $stmtColab->fetchAll();
     <link rel="stylesheet" href="css/css/bootstrap.min.css">
     <link href="css/styles.css" rel="stylesheet">
 </head>
-
 <body class="bg-light">
 
-    <?php include "header.php"; ?>
+<?php include "header.php"; ?>
 
-    <!-- Perfil do usuário -->
-    <div class="container mt-5">
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <img src="<?= !empty($user["foto_perfil"]) ? $user["foto_perfil"] : 'uploads/default.png' ?>"
-                    alt="Foto" class="rounded-circle mb-3" width="120" height="120" style="object-fit:cover;">
-
-                <h2><?= $isOwnProfile ? "Bem-vindo, " . htmlspecialchars($user["nome"]) : htmlspecialchars($user["nome"]) ?></h2>
-                <p><strong>Curso:</strong> <?= htmlspecialchars($user["curso"]) ?></p>
-                <p><strong>Semestre:</strong> <?= (int)$user["semestre"] ?></p>
-
-                <?php if ($isOwnProfile): ?>
-                    <div class="mt-3">
-                        <a href="edit_profile.php" class="btn btn-primary me-2">Editar Perfil</a>
-                        <a href="post_profile.php" class="btn btn-success me-2">Postar Projeto</a>
-                    </div>
-                <?php endif; ?>
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body text-center">
+            <img src="<?= !empty($user["foto_perfil"]) ? $user["foto_perfil"] : 'uploads/default.png' ?>" alt="Foto" class="rounded-circle mb-3" width="120" height="120" style="object-fit:cover;">
+            <h2><?= $isOwnProfile ? "Bem-vindo, " . htmlspecialchars($user["nome"]) : htmlspecialchars($user["nome"]) ?></h2>
+            <p><strong>Curso:</strong> <?= htmlspecialchars($user["curso"]) ?></p>
+            <p><strong>Semestre:</strong> <?= (int)$user["semestre"] ?></p>
+            <?php if ($isOwnProfile): ?>
+            <div class="mt-3">
+                <a href="edit_profile.php" class="btn btn-primary me-2">Editar Perfil</a>
+                <a href="post_profile.php" class="btn btn-success me-2">Postar Projeto</a>
             </div>
+            <?php endif; ?>
         </div>
     </div>
+</div>
 
-    <!-- Projetos próprios -->
-    <div class="container mt-4">
-        <h3><?= $isOwnProfile ? "Projetos" : "Projetos de " . htmlspecialchars($user["nome"]) ?></h3>
-        <div class="row">
-            <?php foreach ($projetos as $proj):
-                $projeto = $proj;
-                include 'components/project_card.php';
-            endforeach; ?>
-        </div>
+<div class="container mt-4">
+    <h3><?= $isOwnProfile ? "Seus Projetos" : "Projetos de " . htmlspecialchars($user["nome"]) ?></h3>
+    <div class="row">
+        <?php foreach ($projetos as $proj):
+            $projeto = $proj;
+            include 'components/project_card.php';
+        endforeach; ?>
     </div>
+</div>
 
-    <!-- Projetos colaborados -->
-    <?php if (!empty($projetosColab)): ?>
-    <div class="container mt-4">
-        <h3><?= $isOwnProfile ? "Colaborações" : "Colaborações de " . htmlspecialchars($user["nome"]) ?></h3>
-        <div class="row">
-            <?php foreach ($projetosColab as $proj):
-                $projeto = $proj;
-                include 'components/project_card.php';
-            endforeach; ?>
-        </div>
+<?php if (!empty($projetosColab)): ?>
+<div class="container mt-4">
+    <h3><?= $isOwnProfile ? "Colaborações" : "Colaborações de " . htmlspecialchars($user["nome"]) ?></h3>
+    <div class="row">
+        <?php foreach ($projetosColab as $proj):
+            $projeto = $proj;
+            include 'components/project_card.php';
+        endforeach; ?>
     </div>
-    <?php endif; ?>
+</div>
+<?php endif; ?>
 
-    <?php include 'components/project_modal.php'; ?>
+<?php include 'components/project_modal.php'; ?>
 
-    <!-- Scripts externos -->
-    <script src="js/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/project.js"></script>
-
+<script src="js/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/project.js"></script>
 </body>
 </html>
