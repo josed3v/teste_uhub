@@ -9,11 +9,15 @@ if(!isset($_SESSION['user_id'])){
 
 $usuario_id = $_SESSION['user_id'];
 
-$stmt = $pdo->prepare("SELECT c.id AS colab_id, c.usuario_id, c.status, u.nome, u.foto_perfil, p.titulo, p.id AS projeto_id
-                       FROM colaboracoes c
-                       JOIN usuarios u ON c.usuario_id = u.id
-                       JOIN projetos p ON c.projeto_id = p.id
-                       WHERE p.usuario_id=? AND c.status='pendente'");
+// Busca solicitações pendentes do usuário dono do projeto
+$stmt = $pdo->prepare("
+    SELECT c.id AS colab_id, c.usuario_id, c.status, u.nome, u.foto_perfil, 
+           p.titulo, p.id AS projeto_id
+    FROM colaboracoes c
+    JOIN usuarios u ON c.usuario_id = u.id
+    JOIN projetos p ON c.projeto_id = p.id
+    WHERE p.usuario_id=? AND c.status='pendente'
+");
 $stmt->execute([$usuario_id]);
 $solicitacoes = $stmt->fetchAll();
 ?>
@@ -23,7 +27,7 @@ $solicitacoes = $stmt->fetchAll();
 <head>
 <meta charset="UTF-8">
 <title>Solicitações de Colaboração</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/css/bootstrap.min.css">
 </head>
 <body>
 <?php include "header.php"; ?>
@@ -38,8 +42,14 @@ $solicitacoes = $stmt->fetchAll();
             <?php foreach($solicitacoes as $s): ?>
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
-                    <img src="<?= htmlspecialchars($s['foto_perfil']) ?>" alt="Foto" width="40" height="40" class="rounded-circle me-2" style="object-fit:cover;">
-                    <strong><?= htmlspecialchars($s['nome']) ?></strong> quer colaborar no projeto <em><?= htmlspecialchars($s['titulo']) ?></em>
+                    <!-- FOTO + NOME viram link para o perfil do usuário -->
+                    <a href="profile_view.php?id=<?= $s['usuario_id'] ?>" class="d-flex align-items-center text-decoration-none text-dark">
+                        <img src="<?= htmlspecialchars($s['foto_perfil'] ?: 'uploads/default.png') ?>" 
+                             alt="Foto" width="40" height="40" 
+                             class="rounded-circle me-2" style="object-fit:cover;">
+                        <strong><?= htmlspecialchars($s['nome']) ?></strong>
+                    </a>
+                    <span class="ms-2">quer colaborar no projeto <em><?= htmlspecialchars($s['titulo']) ?></em></span>
                 </div>
                 <div>
                     <button class="btn btn-success btn-sm me-1" onclick="responderColab(<?= $s['colab_id'] ?>,'aceito')">Aceitar</button>
@@ -51,7 +61,7 @@ $solicitacoes = $stmt->fetchAll();
     <?php endif; ?>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/js/bootstrap.bundle.min.js"></script>
 <script>
 function responderColab(colab_id, status){
     fetch('responder_colab.php', {
@@ -66,5 +76,6 @@ function responderColab(colab_id, status){
     });
 }
 </script>
+
 </body>
 </html>

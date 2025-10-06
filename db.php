@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$dbname = "meubanco";
+$dbname = "uhub_tst";
 $username = "root";
 $password = "";
 

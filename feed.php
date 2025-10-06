@@ -30,7 +30,7 @@ $projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/css/bootstrap.min.css">
     <link href="css/styles.css" rel="stylesheet">
 </head>
 
@@ -49,7 +49,7 @@ $projetos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <?php include "components/project_modal.php"; ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="js/project.js"></script>
 </body>
