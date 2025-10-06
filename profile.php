@@ -71,6 +71,23 @@ $stmtProj = $pdo->prepare("
 $stmtProj->execute([$_SESSION['user_id'], $profileId]);
 $projetos = $stmtProj->fetchAll();
 
+// --- Projetos colaborados do usuário (aceitos) ---
+$stmtColab = $pdo->prepare("
+    SELECT p.*, u.nome AS autor, u.foto_perfil,
+           GROUP_CONCAT(CONCAT(pi.imagem,'::',pi.focus) SEPARATOR '|') AS imagens,
+           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id) AS total_likes,
+           (SELECT COUNT(*) FROM curtidas c WHERE c.projeto_id=p.id AND c.usuario_id=?) AS user_like
+    FROM colaboracoes c
+    JOIN projetos p ON c.projeto_id = p.id
+    JOIN usuarios u ON p.usuario_id = u.id
+    LEFT JOIN projeto_imagens pi ON p.id = pi.projeto_id
+    WHERE c.usuario_id = ? AND c.status='aceito'
+    GROUP BY p.id
+    ORDER BY p.data_publicacao DESC
+");
+$stmtColab->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
+$projetosColab = $stmtColab->fetchAll();
+
 ?>
 <!doctype html>
 <html lang="pt-br">
@@ -79,7 +96,7 @@ $projetos = $stmtProj->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $isOwnProfile ? "Seu Perfil" : "Perfil de " . htmlspecialchars($user["nome"]) ?></title>
-<link rel="stylesheet" href="css/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/css/bootstrap.min.css">
     <link href="css/styles.css" rel="stylesheet">
 </head>
 
@@ -87,6 +104,7 @@ $projetos = $stmtProj->fetchAll();
 
     <?php include "header.php"; ?>
 
+    <!-- Perfil do usuário -->
     <div class="container mt-5">
         <div class="card shadow-sm">
             <div class="card-body text-center">
@@ -107,8 +125,9 @@ $projetos = $stmtProj->fetchAll();
         </div>
     </div>
 
+    <!-- Projetos próprios -->
     <div class="container mt-4">
-        <h3><?= $isOwnProfile ? "Seus Projetos" : "Projetos de " . htmlspecialchars($user["nome"]) ?></h3>
+        <h3><?= $isOwnProfile ? "Projetos" : "Projetos de " . htmlspecialchars($user["nome"]) ?></h3>
         <div class="row">
             <?php foreach ($projetos as $proj):
                 $projeto = $proj;
@@ -117,13 +136,25 @@ $projetos = $stmtProj->fetchAll();
         </div>
     </div>
 
+    <!-- Projetos colaborados -->
+    <?php if (!empty($projetosColab)): ?>
+    <div class="container mt-4">
+        <h3><?= $isOwnProfile ? "Colaborações" : "Colaborações de " . htmlspecialchars($user["nome"]) ?></h3>
+        <div class="row">
+            <?php foreach ($projetosColab as $proj):
+                $projeto = $proj;
+                include 'components/project_card.php';
+            endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?php include 'components/project_modal.php'; ?>
 
     <!-- Scripts externos -->
-<script src="js/js/bootstrap.bundle.min.js"></script>
+    <script src="js/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="js/project.js"></script>
 
 </body>
-
 </html>
