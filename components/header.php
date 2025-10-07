@@ -19,22 +19,51 @@ $stmtPendentes->execute([$user_id]);
 $pendentesCount = $stmtPendentes->fetchColumn();
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-gradient-light shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
   <div class="container">
-    <a class="navbar-brand" href="feed.php">UHub</a>
+    
+    <!-- Marca -->
+    <a class="navbar-brand fw-bold text-primary" href="feed.php">UHub</a>
+
+    <!-- Botão de menu mobile -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
       <span class="navbar-toggler-icon"></span>
     </button>
 
+    <!-- Conteúdo do menu -->
     <div class="collapse navbar-collapse" id="navbarContent">
+
+      <!-- 🔍 Barra de Pesquisa -->
+      <form class="d-flex mx-auto my-2 my-lg-0 search-form" method="GET" action="search.php" role="search">
+        <div class="input-group">
+          <input 
+            class="form-control" 
+            type="search" 
+            name="q" 
+            placeholder="Buscar projetos ou usuários..." 
+            aria-label="Buscar"
+            required>
+          <button class="btn btn-outline-primary" type="submit">
+            <i class="bi bi-search"></i> Buscar
+          </button>
+        </div>
+      </form>
+
+      <!-- Menu à direita -->
       <ul class="navbar-nav ms-auto align-items-center">
+
         <li class="nav-item me-3">
-          <a class="nav-link" href="feed.php">Feed</a>
+          <a class="nav-link fw-semibold" href="feed.php">Feed</a>
         </li>
-        <li class="nav-item ms-3 me-3">
-          <a class="nav-link" href="profile.php"><?= htmlspecialchars($_SESSION["nome"]) ?></a>
+
+        <li class="nav-item me-3">
+          <a class="nav-link fw-semibold" href="profile.php">
+            <?= htmlspecialchars($_SESSION["nome"]) ?>
+          </a>
         </li>
-        <li class="nav-item dropdown">
+
+        <!-- Notificações -->
+        <li class="nav-item dropdown me-3">
           <button class="btn btn-outline-primary position-relative" id="notifBtn" data-bs-toggle="dropdown">
             🔔
             <?php if ($pendentesCount > 0): ?>
@@ -49,14 +78,17 @@ $pendentesCount = $stmtPendentes->fetchColumn();
             </li>
           </ul>
         </li>
-        <li class="nav-item ms-4">
-          <a class="btn btn-secondary" href="logout.php">Sair</a>
+
+        <li class="nav-item">
+          <a class="btn btn-outline-secondary" href="logout.php">Sair</a>
         </li>
+
       </ul>
     </div>
   </div>
 </nav>
 
+<!-- Script de notificações -->
 <script>
 function carregarSolicitacoes() {
     fetch('get_solicitacoes.php')
@@ -65,10 +97,9 @@ function carregarSolicitacoes() {
         const dropdown = document.getElementById('notifDropdown');
         const badge = document.getElementById('notifBadge');
 
-        // Limpa itens (mantendo o link "Ver todas solicitações")
         dropdown.innerHTML = '<li class="dropdown-item text-center"><a href="colaboracoes.php" class="text-decoration-none">Ver todas solicitações</a></li>';
 
-        if (data.length === 0) {
+        if (!data.length) {
             if (badge) badge.style.display = 'none';
             return;
         }
@@ -82,7 +113,7 @@ function carregarSolicitacoes() {
             const li = document.createElement('li');
             li.className = 'dropdown-item d-flex justify-content-between align-items-center';
             li.innerHTML = `
-                <span>${solic.solicitante} quer colaborar no projeto "${solic.projeto}"</span>
+                <span>${solic.solicitante} quer colaborar em "${solic.projeto}"</span>
                 <div>
                     <button class="btn btn-sm btn-success me-1" onclick="responder(${solic.colab_id},'aceito')">✔</button>
                     <button class="btn btn-sm btn-danger" onclick="responder(${solic.colab_id},'rejeitado')">✖</button>
@@ -106,7 +137,36 @@ function responder(colab_id, status) {
     });
 }
 
-// Atualiza a cada 10s
 carregarSolicitacoes();
 setInterval(carregarSolicitacoes, 10000);
 </script>
+
+<!-- Ícones do Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+/* 🌐 Ajustes visuais extras */
+.navbar-brand {
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.search-form {
+  width: 100%;
+  max-width: 450px;
+}
+
+@media (max-width: 991px) {
+  .search-form {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .navbar-nav {
+    text-align: center;
+  }
+  .navbar-nav .btn {
+    width: 100%;
+    margin-top: 5px;
+  }
+}
+</style>
