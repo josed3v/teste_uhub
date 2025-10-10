@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const userLike = card.getAttribute("data-userlike") === "1";
             const userColab = card.getAttribute("data-usercolab") === "1";
             const autor = card.getAttribute("data-autor");
-            const user_id = card.getAttribute("data-user_id"); // 👈 novo atributo para o ID do autor
+            const user_id = card.getAttribute("data-user_id"); 
             const dataPub = new Date(card.getAttribute("data-data"));
             const dataFormatada = dataPub.toLocaleDateString("pt-BR") + " " + dataPub.toLocaleTimeString("pt-BR",{hour:'2-digit',minute:'2-digit'});
 

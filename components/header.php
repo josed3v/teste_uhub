@@ -32,8 +32,7 @@ $pendentesCount = $stmtPendentes->fetchColumn();
 
     <!-- Conteúdo do menu -->
     <div class="collapse navbar-collapse" id="navbarContent">
-
-      <!-- 🔍 Barra de Pesquisa -->
+            <!-- 🔍 Barra de Pesquisa -->
       <form class="d-flex mx-auto my-2 my-lg-0 search-form" method="GET" action="search.php" role="search">
         <div class="input-group">
           <input 
@@ -43,7 +42,7 @@ $pendentesCount = $stmtPendentes->fetchColumn();
             placeholder="Buscar projetos ou usuários..." 
             aria-label="Buscar"
             required>
-          <button class="btn btn-outline-primary" type="submit">
+          <button class="btn btn-outline-secondary" type="submit">
             <i class="bi bi-search"></i> Buscar
           </button>
         </div>
@@ -52,19 +51,19 @@ $pendentesCount = $stmtPendentes->fetchColumn();
       <!-- Menu à direita -->
       <ul class="navbar-nav ms-auto align-items-center">
 
-        <li class="nav-item me-3">
-          <a class="nav-link fw-semibold" href="feed.php">Feed</a>
+        <li class="nav-item m-auto">
+          <a class="nav-link fw-semibold m-auto" href="feed.php">Feed</a>
         </li>
 
-        <li class="nav-item me-3">
+        <li class="nav-item m-auto">
           <a class="nav-link fw-semibold" href="profile.php">
             <?= htmlspecialchars($_SESSION["nome"]) ?>
           </a>
         </li>
-
+        
         <!-- Notificações -->
-        <li class="nav-item dropdown me-3">
-          <button class="btn btn-outline-primary position-relative" id="notifBtn" data-bs-toggle="dropdown">
+        <li class="nav-item dropdown m-auto">
+          <button class="btn position-relative" id="notifBtn" data-bs-toggle="dropdown">
             🔔
             <?php if ($pendentesCount > 0): ?>
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notifBadge">
@@ -80,7 +79,7 @@ $pendentesCount = $stmtPendentes->fetchColumn();
         </li>
 
         <li class="nav-item">
-          <a class="btn btn-outline-secondary" href="logout.php">Sair</a>
+          <a class="btn btn-outline-secondary btn-sm m-auto px-4" href="logout.php">Sair</a>
         </li>
 
       </ul>

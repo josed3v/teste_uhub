@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 06/10/2025 às 09:45
+-- Tempo de geração: 07/10/2025 às 21:56
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -40,8 +40,9 @@ CREATE TABLE `colaboracoes` (
 --
 
 INSERT INTO `colaboracoes` (`id`, `projeto_id`, `usuario_id`, `status`, `data_solicitacao`) VALUES
-(1, 1, 1, 'aceito', '2025-10-06 03:18:07'),
-(2, 1, 2, 'aceito', '2025-10-06 04:24:19');
+(11, 1, 1, 'aceito', '2025-10-06 05:45:00'),
+(12, 1, 2, 'aceito', '2025-10-06 05:58:59'),
+(13, 2, 1, 'aceito', '2025-10-07 16:53:26');
 
 -- --------------------------------------------------------
 
@@ -61,7 +62,9 @@ CREATE TABLE `curtidas` (
 --
 
 INSERT INTO `curtidas` (`id`, `projeto_id`, `usuario_id`, `data_curtida`) VALUES
-(1, 1, 1, '2025-10-06 03:18:08');
+(1, 1, 1, '2025-10-06 03:18:08'),
+(2, 1, 2, '2025-10-06 04:57:54'),
+(4, 2, 1, '2025-10-07 16:53:25');
 
 -- --------------------------------------------------------
 
@@ -95,7 +98,8 @@ CREATE TABLE `projetos` (
 --
 
 INSERT INTO `projetos` (`id`, `usuario_id`, `titulo`, `descricao`, `data_publicacao`) VALUES
-(1, 1, 'desenvolvimento de template para página de marketing em go', 'estudo de desenvolvimento web usando a linguagem go', '2025-10-06 03:17:54');
+(1, 1, 'desenvolvimento de template para página de marketing em go', 'estudo de desenvolvimento web usando a linguagem go', '2025-10-06 03:17:54'),
+(2, 2, 'perca de tempo assisitindo youtube', 'vaaaaarios videos assistidos', '2025-10-07 16:53:09');
 
 -- --------------------------------------------------------
 
@@ -117,7 +121,10 @@ CREATE TABLE `projeto_imagens` (
 INSERT INTO `projeto_imagens` (`id`, `projeto_id`, `imagem`, `focus`) VALUES
 (1, 1, 'uploads/68e35f12a4522.png', 'center'),
 (2, 1, 'uploads/68e35f12a4e3f.png', 'center'),
-(3, 1, 'uploads/68e35f12a5718.png', 'center');
+(3, 1, 'uploads/68e35f12a5718.png', 'center'),
+(4, 2, 'uploads/68e56fa585d23.png', 'center'),
+(5, 2, 'uploads/68e56fa586c63.png', 'center'),
+(6, 2, 'uploads/68e56fa587a87.png', 'center');
 
 -- --------------------------------------------------------
 
@@ -132,6 +139,7 @@ CREATE TABLE `usuarios` (
   `senha` varchar(255) NOT NULL,
   `curso` varchar(100) DEFAULT NULL,
   `semestre` int(11) DEFAULT NULL,
+  `bio` varchar(155) DEFAULT NULL,
   `foto_perfil` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -139,9 +147,9 @@ CREATE TABLE `usuarios` (
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `curso`, `semestre`, `foto_perfil`) VALUES
-(1, 'admin', 'admin@adm', '$2y$12$nSuetNDl3jyaiLHQBSykWOZFpyTfG0ZO9f0mc3MgeDKslyJYAM9pS', 'si', 1, 'uploads/1759731600_278877844_543751553776215_5623169074431439100_n.jpg'),
-(2, 'admin', 'admin2@adm', '$2y$12$BtGpy.wbrmwpB6SqJcTWe.XlCyNOCckqtm6c0dxF1b6RWJbdvJSDu', 'si', 1, NULL);
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `curso`, `semestre`, `bio`, `foto_perfil`) VALUES
+(1, 'admin', 'admin@adm', '$2y$12$nSuetNDl3jyaiLHQBSykWOZFpyTfG0ZO9f0mc3MgeDKslyJYAM9pS', 'si', 1, 'desenvolvedor do projeto para fins de tcc', 'uploads/1759731600_278877844_543751553776215_5623169074431439100_n.jpg'),
+(2, 'xx', 'admin2@adm', '$2y$12$BtGpy.wbrmwpB6SqJcTWe.XlCyNOCckqtm6c0dxF1b6RWJbdvJSDu', 'si', 1, NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -198,13 +206,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `colaboracoes`
 --
 ALTER TABLE `colaboracoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de tabela `curtidas`
 --
 ALTER TABLE `curtidas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `password_resets`
@@ -216,13 +224,13 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT de tabela `projetos`
 --
 ALTER TABLE `projetos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `projeto_imagens`
 --
 ALTER TABLE `projeto_imagens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
